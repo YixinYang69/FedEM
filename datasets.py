@@ -3,9 +3,10 @@ import pickle
 import string
 
 import torch
-from torchvision.datasets import CIFAR10, CIFAR100, EMNIST, MNIST
+from torchvision.datasets import CIFAR10, CIFAR100, EMNIST, MNIST, CelebA
 from torchvision.transforms import Compose, ToTensor, Normalize
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, ConcatDataset, Subset
+
 
 import numpy as np
 from PIL import Image
@@ -326,6 +327,59 @@ class SubMNIST(Dataset):
 
         return img, target, index
     
+class SubCelebA(Dataset):
+    """
+    Constructs a subset of CelebA dataset from a pickle file;
+    expects pickle file to store list of indices
+
+    Attributes
+    ----------
+    indices: iterable of integers
+    transform
+    data
+    targets
+
+    Methods
+    -------
+    __init__
+    __len__
+    __getitem__
+    """
+
+    def __init__(self, path, celeba_data=None, transform=None):
+        """
+        :param path: path to .pkl file; expected to store list of indices
+        :param celeba_data: Concatenated train_test data
+        :param transform:
+        """
+        with open(path, "rb") as f:
+            self.indices = pickle.load(f)
+
+        if transform is None:
+            self.transform =\
+                Compose([
+                    ToTensor(),
+                    Normalize((0.1307,), (0.3081,))
+                ])
+            
+        if celeba_data is None:
+            self.data = get_celeba()
+        else:
+            self.data = celeba_data
+        
+        self.data = Subset(self.data, self.indices)
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, index):
+        img, target = self.data[index]
+
+        if self.transform is not None:
+            img = self.transform(img)
+
+        return img, int(target), index
+    
 
 class CharacterDataset(Dataset):
     def __init__(self, file_path, chunk_len):
@@ -435,7 +489,7 @@ def get_cifar10():
             root=cifar10_path,
             train=False,
             download=False)
-
+    
     cifar10_data = \
         torch.cat([
             torch.tensor(cifar10_train.data),
@@ -502,7 +556,7 @@ def get_mnist():
             root=mnist_path,
             train=False,
             download=False)
-
+    
     mnist_data = \
         torch.cat([
             torch.tensor(mnist_train.data),
@@ -516,3 +570,25 @@ def get_mnist():
         ])
 
     return mnist_data, mnist_targets
+
+def get_celeba():
+    celeba_path = os.path.join("data", "celeba", "raw_data")
+    assert os.path.isdir(celeba_path), "Download celeba dataset!!"
+    
+    celeba_train =\
+        CelebA(
+            root= celeba_path,
+            split='train', download=False,
+            target_transform=lambda x: x[31]
+        )
+
+    celeba_test =\
+        CelebA(
+            root=celeba_path,
+            split='test',
+            download=False,
+            target_transform=lambda x: x[31])
+    
+    celeba_data = ConcatDataset([celeba_train, celeba_test])
+
+    return celeba_data

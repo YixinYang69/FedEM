@@ -62,6 +62,32 @@ class FemnistCNN(nn.Module):
         x = F.relu(self.fc1(x))
         x = self.output(x)
         return x
+    
+class CelebACNN(nn.Module):
+    """
+    Implements a model with two convolutional layers followed by pooling, and a final dense layer with 2048 units.
+    Same architecture used for FEMNIST in "LEAF: A Benchmark for Federated Settings"__
+    We use `zero`-padding instead of  `same`-padding used in
+     https://github.com/TalwalkarLab/leaf/blob/master/models/femnist/cnn.py.
+     178*218
+    """
+    def __init__(self, num_classes):
+        super(CelebACNN, self).__init__()
+        self.conv1 = nn.Conv2d(3, 32, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(32, 64, 5)
+
+        self.fc1 = nn.Linear(64 * 51 * 41, 800)
+        self.output = nn.Linear(800, num_classes)
+
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        print(x.shape)
+        x = x.view(-1, 64 * 51 * 41)
+        x = F.relu(self.fc1(x))
+        x = self.output(x)
+        return x
 
 
 class CIFAR10CNN(nn.Module):

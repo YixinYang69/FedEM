@@ -5,6 +5,7 @@ chkpts/
 data/
 weights/
 adv_data/
+.ipynb_checkpoints/
 
 # Don't track files with these extensioons
 *.pkl
