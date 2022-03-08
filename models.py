@@ -51,6 +51,7 @@ class FemnistCNN(nn.Module):
         self.conv1 = nn.Conv2d(1, 32, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(32, 64, 5)
+        self.conv3 = nn.Conv2d(64, 128, 5) 
 
         self.fc1 = nn.Linear(64 * 4 * 4, 800)
         self.output = nn.Linear(800, num_classes)
@@ -76,15 +77,16 @@ class CelebACNN(nn.Module):
         self.conv1 = nn.Conv2d(3, 32, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(32, 64, 5)
+        self.conv3 = nn.Conv2d(64, 128, 5)
 
-        self.fc1 = nn.Linear(64 * 51 * 41, 800)
-        self.output = nn.Linear(800, num_classes)
+        self.fc1 = nn.Linear(128 * 23 * 18, 8)
+        self.output = nn.Linear(8, num_classes)
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
-        print(x.shape)
-        x = x.view(-1, 64 * 51 * 41)
+        x = self.pool(F.relu(self.conv3(x)))
+        x = x.view(-1, 128 * 23 * 18)
         x = F.relu(self.fc1(x))
         x = self.output(x)
         return x

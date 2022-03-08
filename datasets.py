@@ -368,6 +368,12 @@ class SubCelebA(Dataset):
             self.data = celeba_data
         
         self.data = Subset(self.data, self.indices)
+#         self.img = []
+#         self.target = []
+#         for idx, (im, tar) in enumerate(self.subset_data):
+#             self.img.append(np.array(im))
+#             self.target.append(tar)
+#         Cant Load all the data in memory
 
     def __len__(self):
         return len(self.data)
@@ -589,6 +595,6 @@ def get_celeba():
             download=False,
             target_transform=lambda x: x[31])
     
-    celeba_data = ConcatDataset([celeba_train, celeba_test])
-
+    celeba_data = ConcatDataset([celeba_train, celeba_test]) # Cant load all the data into memory
+    
     return celeba_data
