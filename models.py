@@ -64,32 +64,32 @@ class FemnistCNN(nn.Module):
         x = self.output(x)
         return x
     
-class CelebACNN(nn.Module):
-    """
-    Implements a model with two convolutional layers followed by pooling, and a final dense layer with 2048 units.
-    Same architecture used for FEMNIST in "LEAF: A Benchmark for Federated Settings"__
-    We use `zero`-padding instead of  `same`-padding used in
-     https://github.com/TalwalkarLab/leaf/blob/master/models/femnist/cnn.py.
-     178*218
-    """
-    def __init__(self, num_classes):
-        super(CelebACNN, self).__init__()
-        self.conv1 = nn.Conv2d(3, 32, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(32, 64, 5)
-        self.conv3 = nn.Conv2d(64, 128, 5)
+# class CelebACNN(nn.Module):
+#     """
+#     Implements a model with two convolutional layers followed by pooling, and a final dense layer with 2048 units.
+#     Same architecture used for FEMNIST in "LEAF: A Benchmark for Federated Settings"__
+#     We use `zero`-padding instead of  `same`-padding used in
+#      https://github.com/TalwalkarLab/leaf/blob/master/models/femnist/cnn.py.
+#      178*218
+#     """
+#     def __init__(self, num_classes):
+#         super(CelebACNN, self).__init__()
+#         self.conv1 = nn.Conv2d(3, 32, 5)
+#         self.pool = nn.MaxPool2d(2, 2)
+#         self.conv2 = nn.Conv2d(32, 64, 5)
+#         self.conv3 = nn.Conv2d(64, 128, 5)
 
-        self.fc1 = nn.Linear(128 * 23 * 18, 8)
-        self.output = nn.Linear(8, num_classes)
+#         self.fc1 = nn.Linear(128 * 2 * 2, 800)
+#         self.output = nn.Linear(800, num_classes)
 
-    def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = self.pool(F.relu(self.conv3(x)))
-        x = x.view(-1, 128 * 23 * 18)
-        x = F.relu(self.fc1(x))
-        x = self.output(x)
-        return x
+#     def forward(self, x):
+#         x = self.pool(F.relu(self.conv1(x)))
+#         x = self.pool(F.relu(self.conv2(x)))
+#         x = self.pool(F.relu(self.conv3(x)))
+#         x = x.view(-1, 128 * 2 * 2)
+#         x = F.relu(self.fc1(x))
+#         x = self.output(x)
+#         return x
 
 
 class CIFAR10CNN(nn.Module):

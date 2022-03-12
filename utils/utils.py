@@ -93,7 +93,7 @@ def get_learner(
     elif name == "celeba":
         criterion = nn.BCEWithLogitsLoss(reduction="none").to(device)
         metric = binary_accuracy
-        model = CelebACNN(num_classes=1).to(device)
+        model = get_mobilenet(n_classes=1).to(device)
         is_binary_classification = True
     elif name == "shakespeare":
         all_characters = string.printable
@@ -227,8 +227,7 @@ def get_loaders(type_, root_path, batch_size, is_validation):
     elif type_ == "mnist":
         inputs, targets = get_mnist()
     elif type_ == "celeba":
-        inputs = get_celeba()
-        targets = None
+        inputs, targets = get_celeba()
     else:
         inputs, targets = None, None
 
@@ -305,7 +304,7 @@ def get_loader(type_, path, batch_size, train, inputs=None, targets=None):
     elif type_ == "mnist":
         dataset = SubMNIST(path, mnist_data=inputs, mnist_targets=targets)
     elif type_ == "celeba":
-        dataset = SubCelebA(path, celeba_data=inputs)
+        dataset = SubCelebA(path, celeba_data=inputs, celeba_targets=targets)
     else:
         raise NotImplementedError(f"{type_} not recognized type; possible are {list(LOADER_TYPE.keys())}")
 

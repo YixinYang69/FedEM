@@ -4,10 +4,11 @@ Download CELEBA dataset, and splits it among clients
 import os
 import argparse
 import pickle
+import numpy as np
 
 from torchvision.datasets import CelebA
-from torchvision.transforms import Compose, ToTensor, Normalize
-from torch.utils.data import ConcatDataset
+from torchvision.transforms import Compose, ToTensor, Normalize, Resize
+from torch.utils.data import ConcatDataset, Subset
 
 from sklearn.model_selection import train_test_split
 
@@ -91,7 +92,12 @@ def parse_args():
         type=int,
         default=SEED
     )
-
+    parser.add_argument(
+        '--load_frac',
+        help='seed for the random processes;',
+        type=float,
+        default=1.0
+    )
     return parser.parse_args()
 
 
@@ -99,13 +105,36 @@ def main():
     args = parse_args()
 
     transform = Compose([
+            Resize((50, 50)),
             ToTensor(),
             Normalize((0.1307,), (0.3081,))])
-
+    
+    train_data = CelebA(root=RAW_DATA_PATH, download=False, split='train', transform=transform, target_transform=lambda x: x[31])
+    test_data = CelebA(root=RAW_DATA_PATH, download=False, split='test', transform=transform, target_transform=lambda x: x[31])  #smiling
+    
+    num_points_train = int(len(train_data)*args.load_frac)
+    num_points_test = int(len(test_data)*args.load_frac)
+    
+    train_idx = np.arange(len(train_data))
+    np.random.shuffle(train_idx)
+    train_idx = train_idx[:num_points_train]
+    
+    train_data = Subset(train_data, train_idx)
+    
+    np.save('train_idx', train_idx)
+    
+    test_idx = np.arange(len(test_data))
+    np.random.shuffle(test_idx)
+    test_idx = test_idx[:num_points_test]
+    
+    test_data = Subset(test_data, test_idx)
+    
+    np.save('test_idx', test_idx)
+    
     dataset =\
         ConcatDataset([
-            CelebA(root=RAW_DATA_PATH, download=False, split='train', transform=transform, target_transform=lambda x: x[31]),
-            CelebA(root=RAW_DATA_PATH, download=False, split='test', transform=transform, target_transform=lambda x: x[31])  #smiling 
+            train_data,
+            test_data
         ])
 
     if args.pathological_split:

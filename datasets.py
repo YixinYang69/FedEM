@@ -4,7 +4,7 @@ import string
 
 import torch
 from torchvision.datasets import CIFAR10, CIFAR100, EMNIST, MNIST, CelebA
-from torchvision.transforms import Compose, ToTensor, Normalize
+from torchvision.transforms import Compose, ToTensor, Normalize, Resize
 from torch.utils.data import Dataset, ConcatDataset, Subset
 
 
@@ -346,7 +346,7 @@ class SubCelebA(Dataset):
     __getitem__
     """
 
-    def __init__(self, path, celeba_data=None, transform=None):
+    def __init__(self, path, celeba_data=None, celeba_targets=None, transform=None):
         """
         :param path: path to .pkl file; expected to store list of indices
         :param celeba_data: Concatenated train_test data
@@ -354,20 +354,14 @@ class SubCelebA(Dataset):
         """
         with open(path, "rb") as f:
             self.indices = pickle.load(f)
-
-        if transform is None:
-            self.transform =\
-                Compose([
-                    ToTensor(),
-                    Normalize((0.1307,), (0.3081,))
-                ])
             
         if celeba_data is None:
-            self.data = get_celeba()
+            self.data, self.targets = get_celeba()
         else:
-            self.data = celeba_data
+            self.data, self.targets = celeba_data, celeba_targets
         
-        self.data = Subset(self.data, self.indices)
+        self.data = self.data[self.indices]
+        self.targets = self.targets[self.indices]
 #         self.img = []
 #         self.target = []
 #         for idx, (im, tar) in enumerate(self.subset_data):
@@ -379,10 +373,7 @@ class SubCelebA(Dataset):
         return len(self.data)
 
     def __getitem__(self, index):
-        img, target = self.data[index]
-
-        if self.transform is not None:
-            img = self.transform(img)
+        img, target = self.data[index], self.targets[index]
 
         return img, int(target), index
     
@@ -581,20 +572,44 @@ def get_celeba():
     celeba_path = os.path.join("data", "celeba", "raw_data")
     assert os.path.isdir(celeba_path), "Download celeba dataset!!"
     
+    transform =\
+                Compose([
+                    Resize((50, 50)),
+                    ToTensor(),
+                    Normalize((0.1307,), (0.3081,))
+                ])
+    
     celeba_train =\
         CelebA(
             root= celeba_path,
             split='train', download=False,
+            transform = transform,
             target_transform=lambda x: x[31]
         )
+    
+    train_idx = np.load('data/celeba/train_idx.npy', allow_pickle = True)
+    test_idx = np.load('data/celeba/test_idx.npy', allow_pickle = True)
 
     celeba_test =\
         CelebA(
             root=celeba_path,
             split='test',
             download=False,
+            transform = transform,
             target_transform=lambda x: x[31])
     
-    celeba_data = ConcatDataset([celeba_train, celeba_test]) # Cant load all the data into memory
+    celeba_train = Subset(celeba_train, train_idx)
+    celeba_test = Subset(celeba_test, test_idx)
     
-    return celeba_data
+    celeba_data_X = []
+    celeba_data_y = []
+    
+    for idx, data in enumerate(celeba_train):
+        celeba_data_X.append(data[0])
+        celeba_data_y.append(data[1])
+    
+    for idx, data in enumerate(celeba_test):
+        celeba_data_X.append(data[0])
+        celeba_data_y.append(data[1])
+    
+    return torch.stack(celeba_data_X), torch.stack(celeba_data_y)
