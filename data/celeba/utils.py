@@ -84,7 +84,7 @@ def split_dataset_by_labels(dataset, n_classes, n_clients, n_clusters, alpha, fr
     clusters = {k: [] for k in range(n_clusters)}
     for idx in selected_indices:
         _, label = dataset[idx]
-        group_id = label2cluster[label.item()]
+        group_id = label2cluster[label]
         clusters_sizes[group_id] += 1
         clusters[group_id].append(idx)
 
@@ -156,3 +156,4 @@ def pathological_non_iid_split(dataset, n_classes, n_clients, n_classes_per_clie
             clients_indices[client_id] += shard
 
     return clients_indices
+    

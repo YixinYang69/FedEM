@@ -568,6 +568,19 @@ def get_mnist():
 
     return mnist_data, mnist_targets
 
+# def generate_combinations(num_labels):
+#     all_comb = 2**num_labels
+#     combs = {}
+#     for i in range(all_comb):
+#         combs['{:0{}b}'.format(i, num_labels)] = i
+#     return combs
+
+def transform_target(target, required_labels=[31]):
+    target_str = ''
+    for label in required_labels:
+        target_str += str(int(target[label]))
+    return int(target_str, 2)
+
 def get_celeba():
     celeba_path = os.path.join("data", "celeba", "raw_data")
     assert os.path.isdir(celeba_path), "Download celeba dataset!!"
@@ -576,7 +589,10 @@ def get_celeba():
                 Compose([
                     Resize((50, 50)),
                     ToTensor(),
-                    Normalize((0.1307,), (0.3081,))
+                    Normalize(
+                        (0.4914, 0.4822, 0.4465),
+                        (0.2023, 0.1994, 0.2010)
+                    )
                 ])
     
     celeba_train =\
@@ -584,7 +600,7 @@ def get_celeba():
             root= celeba_path,
             split='train', download=False,
             transform = transform,
-            target_transform=lambda x: x[31]
+            target_transform=lambda x: transform_target(x, required_labels = [31, 20, 15, 35]) # Smiling, Male, Eyeglasses, Wearing Hat
         )
     
     train_idx = np.load('data/celeba/train_idx.npy', allow_pickle = True)
@@ -596,7 +612,8 @@ def get_celeba():
             split='test',
             download=False,
             transform = transform,
-            target_transform=lambda x: x[31])
+            target_transform=lambda x: transform_target(x, required_labels = [31, 20, 15, 35])
+    )
     
     celeba_train = Subset(celeba_train, train_idx)
     celeba_test = Subset(celeba_test, test_idx)
@@ -611,5 +628,5 @@ def get_celeba():
     for idx, data in enumerate(celeba_test):
         celeba_data_X.append(data[0])
         celeba_data_y.append(data[1])
-    
-    return torch.stack(celeba_data_X), torch.stack(celeba_data_y)
+        
+    return torch.stack(celeba_data_X), torch.Tensor(celeba_data_y)

@@ -159,7 +159,7 @@ def run_experiment(args_):
             pbar.update(1)
             current_round = aggregator.c_round
             
-        if current_round%5==0:
+        if current_round%20==0:
             save_root = os.path.join(args_.save_path+"_"+str(current_round))
             os.makedirs(save_root, exist_ok=True)
             aggregator.save_state(save_root)

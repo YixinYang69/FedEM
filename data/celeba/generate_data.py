@@ -16,11 +16,17 @@ from utils import split_dataset_by_labels, pathological_non_iid_split
 
 
 ALPHA = .4
-N_CLASSES = 2 # Binary classification smiling or not
+N_CLASSES = 16
 N_COMPONENTS = 3
 SEED = 12345
 RAW_DATA_PATH = "raw_data/"
 PATH = "all_data/"
+
+def transform_target(target, required_labels=[31]):
+    target_str = ''
+    for label in required_labels:
+        target_str += str(int(target[label]))
+    return int(target_str, 2)
 
 
 def save_data(l, path_):
@@ -107,10 +113,13 @@ def main():
     transform = Compose([
             Resize((50, 50)),
             ToTensor(),
-            Normalize((0.1307,), (0.3081,))])
+            Normalize(
+                        (0.4914, 0.4822, 0.4465),
+                        (0.2023, 0.1994, 0.2010)
+                    )])
     
-    train_data = CelebA(root=RAW_DATA_PATH, download=False, split='train', transform=transform, target_transform=lambda x: x[31])
-    test_data = CelebA(root=RAW_DATA_PATH, download=False, split='test', transform=transform, target_transform=lambda x: x[31])  #smiling
+    train_data = CelebA(root=RAW_DATA_PATH, download=False, split='train', transform=transform, target_transform=lambda x: transform_target(x, required_labels = [31, 20, 15, 35])) # Smiling, Male, Eyeglasses, Wearing Hat
+    test_data = CelebA(root=RAW_DATA_PATH, download=False, split='test', transform=transform, target_transform=lambda x: transform_target(x, required_labels = [31, 20, 15, 35])) # Smiling, Male, Eyeglasses, Wearing Hat
     
     num_points_train = int(len(train_data)*args.load_frac)
     num_points_test = int(len(test_data)*args.load_frac)

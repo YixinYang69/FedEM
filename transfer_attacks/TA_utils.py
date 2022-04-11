@@ -100,22 +100,22 @@ def dummy_aggregator(args_, num_user=80):
         logs_root = os.path.join("logs", args_to_string(args_))
 
     print("==> Clients initialization..")
-    clients_temp = init_clients(
+    clients = init_clients(
         args_,
         root_path=os.path.join(data_dir, "train"),
         logs_root=os.path.join(logs_root, "train")
     )
 
-    clients = clients_temp[:num_user]
+    clients = clients[:num_user]
     
     print("==> Test Clients initialization..")
-    test_clients_temp = init_clients(
+    test_clients = init_clients(
         args_,
         root_path=os.path.join(data_dir, "test"),
         logs_root=os.path.join(logs_root, "test")
     )
     
-    test_clients = test_clients_temp[:num_user]
+    test_clients = test_clients[:num_user]
 
     logs_path = os.path.join(logs_root, "train", "global")
     os.makedirs(logs_path, exist_ok=True)

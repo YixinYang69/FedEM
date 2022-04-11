@@ -91,10 +91,10 @@ def get_learner(
         model = FemnistCNN(num_classes=10).to(device)
         is_binary_classification = False
     elif name == "celeba":
-        criterion = nn.BCEWithLogitsLoss(reduction="none").to(device)
-        metric = binary_accuracy
-        model = get_mobilenet(n_classes=1).to(device)
-        is_binary_classification = True
+        criterion = nn.CrossEntropyLoss(reduction="none").to(device)
+        metric = accuracy
+        model = get_mobilenet(n_classes=16).to(device)
+        is_binary_classification = False
     elif name == "shakespeare":
         all_characters = string.printable
         labels_weight = torch.ones(len(all_characters), device=device)

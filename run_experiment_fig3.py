@@ -39,10 +39,10 @@ import numba
 
 if __name__ == "__main__":
     
-    exp_names = ['local_defend', 'fed_avg_defend','fedem_defend']
-    exp_method = ['local_adv','FedAvg_adv','FedEM_adv']
-    exp_num_learners = [1,1,3]
-    exp_lr = [0.03, 0.01, 0.03]
+    exp_names = ['fedem_defend']
+    exp_method = ['FedEM_adv']
+    exp_num_learners = [3]
+    exp_lr = [0.03]
     
         
     for itt in range(len(exp_names)):
@@ -51,7 +51,7 @@ if __name__ == "__main__":
         
         # Manually set argument parameters
         args_ = Args()
-        args_.experiment = "mnist"
+        args_.experiment = "celeba"
         args_.method = exp_method[itt]
         args_.decentralized = False
         args_.sampling_rate = 1.0
@@ -73,9 +73,9 @@ if __name__ == "__main__":
         args_.locally_tune_clients = False
         args_.seed = 1234
         args_.verbose = 1
-        args_.save_path = 'weights/mnist_adv/' + exp_names[itt]
+        args_.save_path = 'weights/celeba_16_adv/' + exp_names[itt]
         args_.validation = False
-        args_.save_freq = 10
+        args_.save_freq = 20
 
         # Other Argument Parameters
         Q = 10 # update per round
