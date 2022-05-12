@@ -39,66 +39,61 @@ import numba
 
 if __name__ == "__main__":
     
-    exp_names = ['no_macro_resources', 'yes_macro_resources']
-    # exp_names = ['yes_macro_resources']
-    # print(exp_names[0])
+    #exp_names = ['fedem_defend', 'fed_avg_defend']
+    #exp_method = ['FedEM_adv', 'FedAvg_adv']
+    #exp_num_learners = [3, 1]
+    #exp_lr = [0.03, 0.01]
+    exp_names = ['fed_avg_defend']
+    exp_method = ['FedAvg_adv']
+    exp_num_learners = [1]
+    exp_lr = [0.01]
+    
         
-    # Manually set argument parameters
-    args_ = Args()
-    args_.experiment = "celeba"
-    args_.method = "FedEM_adv"
-    args_.decentralized = False
-    args_.sampling_rate = 1.0
-    args_.input_dimension = None
-    args_.output_dimension = None
-    args_.n_learners= 3
-    args_.n_rounds = 101
-    args_.bz = 128
-    args_.local_steps = 1
-    args_.lr_lambda = 0
-    args_.lr =0.03
-    args_.lr_scheduler = 'multi_step'
-    args_.log_freq = 10
-    args_.device = 'cuda'
-    args_.optimizer = 'sgd'
-    args_.mu = 0
-    args_.communication_probability = 0.1
-    args_.q = 1
-    args_.locally_tune_clients = False
-    args_.seed = 1234
-    args_.verbose = 1
-    args_.validation = False
-    args_.save_freq = 10
-
-            # Other Argument Parameters
-    Q = 10 # update per round
-    G = 0.15
-    num_clients = 40
-    S = 0.05 # Threshold
-    step_size = 0.01
-    K = 10
-    eps = 0.1
-    prob = 0.8
-    hi_ru = 0.7
-    lo_ru = 0.001
-        
-    # Randomized Parameters
-    Ru_dist= np.random.uniform(0, 1, size=num_clients)
-    Ru = np.zeros(num_clients)
-    for i in range(Ru_dist.shape[0]):
-        if Ru_dist[i] < prob:
-            Ru[i] = lo_ru
-        else:
-            Ru[i] = hi_ru
-                
     for itt in range(len(exp_names)):
         
         print("running trial:", itt)
         
-        args_.save_path = 'weights/celeba_prop_new/' + exp_names[itt]
+        # Manually set argument parameters
+        args_ = Args()
+        args_.experiment = "cifar10" ####### CIFAR
+        args_.method = exp_method[itt]
+        args_.decentralized = False
+        args_.sampling_rate = 1.0
+        args_.input_dimension = None
+        args_.output_dimension = None
+        args_.n_learners= exp_num_learners[itt]
+        args_.n_rounds = 100
+        args_.bz = 128
+        args_.local_steps = 1
+        args_.lr_lambda = 0
+        args_.lr = exp_lr[itt]
+        args_.lr_scheduler = 'multi_step'
+        args_.log_freq = 20
+        args_.device = 'cuda'
+        args_.optimizer = 'sgd'
+        args_.mu = 0
+        args_.communication_probability = 0.1
+        args_.q = 1
+        args_.locally_tune_clients = False
+        args_.seed = 1234
+        args_.verbose = 1
+        args_.save_path = 'weights/cifar10_adv/' + exp_names[itt]
+        args_.validation = False
+        args_.save_freq = 20
+        args_.tune_steps = 10
 
-        
-        # Ru = np.ones(num_clients)
+        # Other Argument Parameters
+        Q = 10 # update per round
+        G = 0.5
+        num_clients = 40
+        S = 0.05 # Threshold
+        step_size = 0.01
+        K = 10
+        eps = 0.1
+
+        # Randomized Parameters
+        # Ru = np.random.uniform(0, 0.5, size=num_clients)
+        Ru = np.ones(num_clients)
         
         # Generate the dummy values here
         aggregator, clients = dummy_aggregator(args_, num_clients)
@@ -143,11 +138,7 @@ if __name__ == "__main__":
                 Wh = np.sum(Whu,axis=0)/num_clients
 
                 # Solve for adversarial ratio at every client
-                if exp_names[itt] == "no_macro_resources":
-                    Fu = solve_proportions_dummy(G, num_clients, num_h, Du, Whu, S, Ru, step_size)
-                else:
-                    Fu = solve_proportions(G, num_clients, num_h, Du, Whu, S, Ru, step_size)
-                print(Fu)
+                Fu = solve_proportions(G, num_clients, num_h, Du, Whu, S, Ru, step_size)
 
                 # Assign proportion and attack params
                 # Assign proportion and compute new dataset
@@ -158,13 +149,13 @@ if __name__ == "__main__":
 
             aggregator.mix()
             
-            # Save more often the intermediate NN
-            if current_round% args_.save_freq == 0:
-                if "save_path" in args_:
-                    save_root = os.path.join(args_.save_path)
+#             # Save more often the intermediate NN
+#             if current_round% args_.save_freq == 0:
+#                 if "save_path" in args_:
+#                     save_root = os.path.join(args_.save_path)
 
-                    os.makedirs(save_root, exist_ok=True)
-                    aggregator.save_state_intermed(save_root, current_round)
+#                     os.makedirs(save_root, exist_ok=True)
+#                     aggregator.save_state_intermed(save_root, current_round)
 
             if aggregator.c_round != current_round:
                 pbar.update(1)
@@ -172,10 +163,12 @@ if __name__ == "__main__":
 
         if "save_path" in args_:
             save_root = os.path.join(args_.save_path)
+            for client in aggregator.clients:
+                client.update_tuned_learners()
 
             os.makedirs(save_root, exist_ok=True)
-            aggregator.save_state(save_root)
+            aggregator.save_state_local(save_root)
             
-        del aggregator, clients
+        del args_, aggregator, clients
         torch.cuda.empty_cache()
             

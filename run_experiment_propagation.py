@@ -39,9 +39,8 @@ import numba
 
 if __name__ == "__main__":
     
-    exp_names = ['no_macro_resources', 'yes_macro_resources']
-    # exp_names = ['yes_macro_resources']
-    # print(exp_names[0])
+    exp_names = ['prop_n1', 'prop_n2', 'prop_n5', 'prop_n10', 'prop_n20', 'prop_n40']
+    ample_client_count = [1,2,5,10,20,40]
         
     # Manually set argument parameters
     args_ = Args()
@@ -52,7 +51,7 @@ if __name__ == "__main__":
     args_.input_dimension = None
     args_.output_dimension = None
     args_.n_learners= 3
-    args_.n_rounds = 101
+    args_.n_rounds = 100 # Reduced number of steps
     args_.bz = 128
     args_.local_steps = 1
     args_.lr_lambda = 0
@@ -69,6 +68,7 @@ if __name__ == "__main__":
     args_.verbose = 1
     args_.validation = False
     args_.save_freq = 10
+    args_.tune_steps = None
 
             # Other Argument Parameters
     Q = 10 # update per round
@@ -82,20 +82,22 @@ if __name__ == "__main__":
     hi_ru = 0.7
     lo_ru = 0.001
         
-    # Randomized Parameters
-    Ru_dist= np.random.uniform(0, 1, size=num_clients)
-    Ru = np.zeros(num_clients)
-    for i in range(Ru_dist.shape[0]):
-        if Ru_dist[i] < prob:
-            Ru[i] = lo_ru
-        else:
-            Ru[i] = hi_ru
                 
     for itt in range(len(exp_names)):
         
-        print("running trial:", itt)
         
-        args_.save_path = 'weights/celeba_prop_new/' + exp_names[itt]
+        # Randomized Parameters
+        Ru = np.zeros(num_clients)
+        for i in range(Ru.shape[0]):
+            if i < ample_client_count[itt]:
+                Ru[i] = hi_ru
+            else:
+                Ru[i] = lo_ru
+        
+        
+        print("running trial:", itt, "out of", len(exp_names)-1)
+        
+        args_.save_path = 'weights/celeba_prop/' + exp_names[itt]
 
         
         # Ru = np.ones(num_clients)
@@ -143,10 +145,10 @@ if __name__ == "__main__":
                 Wh = np.sum(Whu,axis=0)/num_clients
 
                 # Solve for adversarial ratio at every client
-                if exp_names[itt] == "no_macro_resources":
-                    Fu = solve_proportions_dummy(G, num_clients, num_h, Du, Whu, S, Ru, step_size)
-                else:
-                    Fu = solve_proportions(G, num_clients, num_h, Du, Whu, S, Ru, step_size)
+#                 if exp_names[itt] == "no_macro_resources":
+#                     Fu = solve_proportions_dummy(G, num_clients, num_h, Du, Whu, S, Ru, step_size)
+#                 else:
+                Fu = solve_proportions(G, num_clients, num_h, Du, Whu, S, Ru, step_size)
                 print(Fu)
 
                 # Assign proportion and attack params
@@ -158,13 +160,6 @@ if __name__ == "__main__":
 
             aggregator.mix()
             
-            # Save more often the intermediate NN
-            if current_round% args_.save_freq == 0:
-                if "save_path" in args_:
-                    save_root = os.path.join(args_.save_path)
-
-                    os.makedirs(save_root, exist_ok=True)
-                    aggregator.save_state_intermed(save_root, current_round)
 
             if aggregator.c_round != current_round:
                 pbar.update(1)

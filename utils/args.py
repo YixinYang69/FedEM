@@ -186,6 +186,12 @@ def parse_args(args_list=None):
         type=int,
         default=10
     )
+    parser.add_argument(
+        "--tune_steps",
+        help='local tuning steps',
+        type=int,
+        default=None
+    )
 
     if args_list:
         args = parser.parse_args(args_list)

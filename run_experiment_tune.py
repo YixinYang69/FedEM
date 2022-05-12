@@ -156,6 +156,7 @@ def run_experiment(args_, num_user = 40):
     print("Training..")
     pbar = tqdm(total=args_.n_rounds)
     current_round = 0
+    
     while current_round <= args_.n_rounds:
 
         aggregator.mix()
@@ -167,14 +168,15 @@ def run_experiment(args_, num_user = 40):
 #         if current_round%20==0:
 #             save_root = os.path.join(args_.save_path+"_"+str(current_round))
 #             os.makedirs(save_root, exist_ok=True)
-#             aggregator.save_state(save_root)
 #             aggregator.save_state_local(save_root)
 
     if "save_path" in args_:
         save_root = os.path.join(args_.save_path)
+        for client in aggregator.clients:
+            client.update_tuned_learners()
 
         os.makedirs(save_root, exist_ok=True)
-        aggregator.save_state(save_root)
+        aggregator.save_state_local(save_root)
 
 
 if __name__ == "__main__":
