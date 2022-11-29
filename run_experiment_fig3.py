@@ -39,10 +39,10 @@ import numba
 
 if __name__ == "__main__":
     
-    exp_names = ['fedem_defend']
-    exp_method = ['FedEM_adv']
-    exp_num_learners = [3]
-    exp_lr = [0.03]
+    exp_names = ['FedAvg_adv']
+    exp_method = ['FedAvg_adv']
+    exp_num_learners = [1]
+    exp_lr = [0.01]
     
         
     for itt in range(len(exp_names)):
@@ -51,15 +51,15 @@ if __name__ == "__main__":
         
         # Manually set argument parameters
         args_ = Args()
-        args_.experiment = "celeba"
+        args_.experiment = "cifar10"
         args_.method = exp_method[itt]
         args_.decentralized = False
         args_.sampling_rate = 1.0
         args_.input_dimension = None
         args_.output_dimension = None
         args_.n_learners= exp_num_learners[itt]
-        args_.n_rounds = 101
-        args_.bz = 128
+        args_.n_rounds = 50
+        args_.bz = 2
         args_.local_steps = 1
         args_.lr_lambda = 0
         args_.lr = exp_lr[itt]
@@ -73,14 +73,15 @@ if __name__ == "__main__":
         args_.locally_tune_clients = False
         args_.seed = 1234
         args_.verbose = 1
-        args_.save_path = 'weights/celeba_16_adv/' + exp_names[itt]
+        args_.save_path = 'weights/cifar_10_50_rnds/' + exp_names[itt]
         args_.validation = False
         args_.save_freq = 20
+        args_.tune_steps = 0
 
         # Other Argument Parameters
         Q = 10 # update per round
         G = 0.5
-        num_clients = 40
+        num_clients =  1 #original value 40
         S = 0.05 # Threshold
         step_size = 0.01
         K = 10

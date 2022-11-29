@@ -70,7 +70,7 @@ def init_clients(args_, root_path, logs_root):
             logger=logger,
             local_steps=args_.local_steps,
             tune_locally=args_.locally_tune_clients,
-            tune_steps=args_.tune_steps
+            tune_steps=1
         )
 
         clients_.append(client)
@@ -171,13 +171,16 @@ def run_experiment(args_, num_user = 40):
 #             aggregator.save_state_local(save_root)
 
     if "save_path" in args_:
-        save_root = os.path.join(args_.save_path)
-        for client in aggregator.clients:
-            client.update_tuned_learners()
-
-        os.makedirs(save_root, exist_ok=True)
-        aggregator.save_state_local(save_root)
-
+        
+        
+        for step in range(1, args_.tune_steps + 1):
+            if step in {5, 10, 20, 40}:
+                save_root = os.path.join(args_.save_path, f'{step}')
+                os.makedirs(save_root, exist_ok=True)
+                aggregator.save_state_local(save_root)
+                
+            for client in aggregator.clients:
+                client.update_tuned_learners()
 
 if __name__ == "__main__":
     torch.backends.cudnn.deterministic = True

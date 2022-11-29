@@ -78,7 +78,7 @@ def init_clients(args_, root_path, logs_root):
     return clients_
 
 
-def run_experiment(args_, num_user = 40):
+def run_experiment(args_, num_user = 50):
     torch.manual_seed(args_.seed)
 
     data_dir = get_data_dir(args_.experiment)
@@ -163,6 +163,9 @@ def run_experiment(args_, num_user = 40):
         if aggregator.c_round != current_round:
             pbar.update(1)
             current_round = aggregator.c_round
+            
+#         if current_round == 14:
+#             break
             
 #         if current_round%20==0:
 #             save_root = os.path.join(args_.save_path+"_"+str(current_round))

@@ -19,9 +19,10 @@ ALPHA = .4
 N_CLASSES = 16
 N_COMPONENTS = 3
 SEED = 12345
-RAW_DATA_PATH = "raw_data/"
-PATH = "all_data/"
+RAW_DATA_PATH = "/home/ubuntu/FedEM_Shubh/FedEM/data/celeba/raw_data/"
+PATH = "/home/ubuntu/FedEM_Shubh/FedEM/data/celeba/all_data/"
 
+np.random.seed(SEED)
 def transform_target(target, required_labels=[31]):
     target_str = ''
     for label in required_labels:
@@ -130,7 +131,7 @@ def main():
     
     train_data = Subset(train_data, train_idx)
     
-    np.save('train_idx', train_idx)
+    np.save('/home/ubuntu/FedEM_Shubh/FedEM/data/celeba/train_idx', train_idx)
     
     test_idx = np.arange(len(test_data))
     np.random.shuffle(test_idx)
@@ -138,7 +139,7 @@ def main():
     
     test_data = Subset(test_data, test_idx)
     
-    np.save('test_idx', test_idx)
+    np.save('/home/ubuntu/FedEM_Shubh/FedEM/data/celeba/test_idx', test_idx)
     
     dataset =\
         ConcatDataset([

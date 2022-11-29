@@ -19,3 +19,10 @@ class Custom_Dataloader:
         y_point = self.y_data[sample_idx].to(device='cuda')
         
         return sample_idx, x_point, y_point
+
+    def load_single_batch(self, batch_size):
+        samples = range(0, batch_size)
+        out_x_data = self.x_data[samples].to(device='cuda')
+        out_y_data = self.y_data[samples].to(device='cuda')
+        
+        return out_x_data, out_y_data

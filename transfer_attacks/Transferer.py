@@ -83,7 +83,7 @@ class Transferer():
         
         return
     
-    def generate_xadv(self, atk_type = "IFSGM", mode='test'):
+    def generate_xadv(self, load_single_batch=False, atk_type = "IFSGM", mode='test'):
         """
         Generate perturbed images
         atk_type - "IFSGM" or "CW"
@@ -92,7 +92,7 @@ class Transferer():
         if (atk_type == "IFSGM") or (atk_type == "ifsgm"): 
             self.advNN.i_fgsm(self.atk_params, mode=mode)
         elif (atk_type == "PGD") or (atk_type == "pgd"):
-            self.advNN.pgd(self.atk_params, mode=mode)
+            self.advNN.pgd(self.atk_params, load_single_batch, mode=mode)
         else:
             print("Attak type unidentified -- Running IFSGM")
             self.advNN.i_fgsm(self.atk_params, mode=mode)

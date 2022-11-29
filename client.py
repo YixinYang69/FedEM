@@ -519,8 +519,8 @@ class Adv_Client(Client):
             idx = sample_id[i]
             x_val_normed = x_adv[i]
             try:
-                x_val_unnorm = unnormalize_celeba(x_val_normed)
-                #x_val_unnorm = unnormalize_cifar10(x_val_normed)
+                # x_val_unnorm = unnormalize_celeba(x_val_normed)
+                x_val_unnorm = unnormalize_cifar10(x_val_normed)
             except:
                 x_val_unnorm = unnormalize_femnist(x_val_normed)
         

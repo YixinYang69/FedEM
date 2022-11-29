@@ -92,15 +92,19 @@ class PGD_Params():
         self.eps = 0.5
         self.eps_norm = 2
         self.num_class = 10
+        self.alpha = 0.01
 
         
         
-    def set_params(self, batch_size=None, iteration = None,
+    def set_params(self, batch_size=None, iteration = None, alpha = None,
                    target = None, x_val_min = None, x_val_max = None,
                    step_size = None, step_norm = None, eps = None, eps_norm = None):
         
         if batch_size is not None:
             self.batch_size = batch_size
+            
+        if alpha is not None:
+            self.alpha = alpha
             
         if iteration is not None:
             self.iteration = iteration

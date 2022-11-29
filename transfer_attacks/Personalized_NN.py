@@ -291,7 +291,7 @@ class Adv_NN(Personalized_NN):
         
         return
         
-    def pgd(self, atk_params, print_info=False, mode='test'):
+    def pgd(self, atk_params, load_single=False, print_info=False, mode='test'):
         
         self.eval()
         
@@ -306,8 +306,11 @@ class Adv_NN(Personalized_NN):
         x_val_max= atk_params.x_val_max
         
         # Load data to perturb
-    
-        data_x, data_y = self.dataloader.load_batch(batch_size, mode=mode)
+
+        if not load_single:
+            data_x, data_y = self.dataloader.load_batch(batch_size, mode=mode)
+        else:
+            data_x, data_y = self.dataloader.load_single_batch(batch_size)
         
         self.x_orig  = data_x.reshape(batch_size, data_x.shape[1],data_x.shape[2],data_x.shape[3])
         self.y_orig = data_y.type(torch.LongTensor)
