@@ -125,8 +125,8 @@ if __name__ == "__main__":
             idxs = random.sample(range(num_clients), num_unl_clients[itt])
             for idx in idxs:
                 print('adv unl idx,', idx)
-#                 aggregator.clients[idx].unlearning_flag = True
-                aggregator.clients[idx].adv_proportion = 0
+                aggregator.clients[idx].unlearning_flag = True
+#                 aggregator.clients[idx].adv_proportion = 0
 
         # Train the model
         print("Training..")
